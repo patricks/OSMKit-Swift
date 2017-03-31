@@ -1,6 +1,6 @@
 //
 //  OSMRelationMember.swift
-//  Pods
+//  OSMKit
 //
 //  Created by David Chiles on 12/11/15.
 //
@@ -9,40 +9,40 @@
 import Foundation
 
 public enum OSMID {
-    case Node(Int64)
-    case Way(Int64)
-    case Relation(Int64)
-    
-    init(type:OSMElementType,ref:Int64) {
+    case node(Int64)
+    case way(Int64)
+    case relation(Int64)
+
+    init(type: OSMElementType, ref: Int64) {
         switch type {
-        case .Node: self = .Node(ref)
-        case .Way: self = .Way(ref)
-        case .Relation: self = .Relation(ref)
+        case .node: self = .node(ref)
+        case .way: self = .way(ref)
+        case .relation: self = .relation(ref)
         }
     }
-    
+
     func type() -> OSMElementType {
         switch self {
-        case .Node(_): return .Node
-        case .Way(_): return .Way
-        case .Relation(_): return .Relation
+        case .node: return .node
+        case .way: return .way
+        case .relation: return .relation
         }
     }
-    
+
     func ref() -> Int64 {
         switch self {
-        case .Node(let ref): return ref
-        case .Way(let ref): return ref
-        case .Relation(let ref): return ref
+        case .node(let ref): return ref
+        case .way(let ref): return ref
+        case .relation(let ref): return ref
         }
     }
 }
 
 public struct OSMRelationMember {
-    public var member:OSMID
-    public var role:String?
-    
-    init(member:OSMID, role:String?) {
+    public var member: OSMID
+    public var role: String?
+
+    init(member: OSMID, role: String?) {
         self.member = member
         self.role = role
     }

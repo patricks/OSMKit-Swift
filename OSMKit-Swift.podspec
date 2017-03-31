@@ -9,7 +9,6 @@ Pod::Spec.new do |spec|
   spec.requires_arc = true
   spec.platform     = :ios, "9.0"
 
-
   spec.default_subspec = 'Core'
 
   spec.subspec 'Core' do |sp|
@@ -19,8 +18,6 @@ Pod::Spec.new do |spec|
   spec.subspec 'API' do |sp|
     sp.dependency 'OSMKit-Swift/Core'
     sp.source_files = 'Source/API/*.swift'
-    sp.dependency 'Alamofire', '~> 3.1'
-    sp.dependency 'AEXML', '~> 2.0'
   end
 
 end

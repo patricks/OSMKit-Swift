@@ -9,145 +9,140 @@
 import Foundation
 
 internal enum JSONKeys: String {
-    case Geometry = "geometry"
-    case Coordinates = "coordinates"
-    case Properties = "properties"
-    case ID = "id"
-    case URL = "url"
-    case Status = "status"
-    case DateCreated = "date_created"
-    case DateClosed = "closed_at"
-    case Comments = "comments"
-    case Text = "text"
-    case Date = "date"
-    case Action = "action"
-    case UID = "uid"
-    case User = "user"
-    case Features = "features"
+    case geometry = "geometry"
+    case coordinates = "coordinates"
+    case properties = "properties"
+    case id = "id"
+    case url = "url"
+    case status = "status"
+    case dateCreated = "date_created"
+    case dateClosed = "closed_at"
+    case comments = "comments"
+    case text = "text"
+    case date = "date"
+    case action = "action"
+    case uid = "uid"
+    case user = "user"
+    case features = "features"
 }
 
 internal enum NoteStatusValue: String {
-    case open = "open"
-    case closed = "closed"
-    
-}
-
-public enum OSMCommentAction: String {
-    case Open      = "opened"
-    case Reopened  = "reopened"
-    case Closed    = "closed"
-    case Commented = "commented"
+    case open
+    case closed
 }
 
 public class JSONDecoder {
-    
     class func comment(dictionary:[String:AnyObject]) throws -> OSMComment {
-        
-        
-        guard let dateString = dictionary[JSONKeys.Date.rawValue] as? String else {
-            throw JSONParsingError.CannotDecodeKey(key: .Date)
+        guard let dateString = dictionary[JSONKeys.date.rawValue] as? String else {
+            throw JSONParsingError.cannotDecodeKey(key: .date)
         }
         
-        guard let actionString = dictionary[JSONKeys.Action.rawValue] as? String else {
-            throw JSONParsingError.CannotDecodeKey(key: .Action)
+        guard let actionString = dictionary[JSONKeys.action.rawValue] as? String else {
+            throw JSONParsingError.cannotDecodeKey(key: .action)
         }
         
         guard let action = OSMCommentAction(rawValue: actionString) else {
-            throw JSONParsingError.CannotDecodeKey(key: .Action)
+            throw JSONParsingError.cannotDecodeKey(key: .action)
         }
         
-        let text = dictionary[JSONKeys.Text.rawValue] as? String
+        let text = dictionary[JSONKeys.text.rawValue] as? String
         
-        let uid = dictionary[JSONKeys.UID.rawValue] as? NSNumber
+        let uid = dictionary[JSONKeys.uid.rawValue] as? NSNumber
         
-        let username = dictionary[JSONKeys.User.rawValue] as? String
+        let username = dictionary[JSONKeys.user.rawValue] as? String
         
         var comment = OSMComment(dateString: dateString, action: action)
         comment.text = text
-        comment.userId = uid?.longLongValue
+        comment.userId = uid?.int64Value
         comment.username = username
         
         return comment
     }
-    
-    class func note(dict:[String:AnyObject]) throws -> OSMNote {
-        guard let geometry = dict[JSONKeys.Geometry.rawValue] as? [String:AnyObject] else {
-            throw JSONParsingError.CannotDecodeKey(key: JSONKeys.Geometry)
+
+    class func note(dict: [String: AnyObject]) throws -> OSMNote {
+        guard let geometry = dict[JSONKeys.geometry.rawValue] as? [String: AnyObject] else {
+            throw JSONParsingError.cannotDecodeKey(key: JSONKeys.geometry)
         }
         
-        guard let coordinates = geometry[JSONKeys.Coordinates.rawValue] as? [Double] else {
-            throw JSONParsingError.CannotDecodeKey(key: JSONKeys.Coordinates)
+        guard let coordinates = geometry[JSONKeys.coordinates.rawValue] as? [Double] else {
+            throw JSONParsingError.cannotDecodeKey(key: JSONKeys.coordinates)
         }
         
         if coordinates.count != 2 {
-            throw JSONParsingError.InvalidJSONStructure
+            throw JSONParsingError.invalidJSONStructure
         }
         
         let lon = coordinates[0]
         let lat = coordinates[1]
         
         
-        guard let properties = dict[JSONKeys.Properties.rawValue] as? [String:AnyObject] else {
-            throw JSONParsingError.CannotDecodeKey(key: JSONKeys.Properties)
+        guard let properties = dict[JSONKeys.properties.rawValue] as? [String: AnyObject] else {
+            throw JSONParsingError.cannotDecodeKey(key: JSONKeys.properties)
         }
         
-        guard let id = (properties[JSONKeys.ID.rawValue] as? NSNumber)?.longLongValue else {
-            throw JSONParsingError.CannotDecodeKey(key: JSONKeys.ID)
+        guard let id = (properties[JSONKeys.id.rawValue] as? NSNumber)?.int64Value else {
+            throw JSONParsingError.cannotDecodeKey(key: JSONKeys.id)
         }
         
-        guard let urlString = properties[JSONKeys.URL.rawValue] as? String else {
-            throw JSONParsingError.CannotDecodeKey(key: JSONKeys.URL)
+        guard let urlString = properties[JSONKeys.url.rawValue] as? String else {
+            throw JSONParsingError.cannotDecodeKey(key: JSONKeys.url)
         }
         let url = NSURL(string: urlString)
         
-        let status = (properties[JSONKeys.Status.rawValue] as? String) == NoteStatusValue.open.rawValue
+        let status = (properties[JSONKeys.status.rawValue] as? String) == NoteStatusValue.open.rawValue
         
-        guard let dateCreated = properties[JSONKeys.DateCreated.rawValue] as? String else {
-            throw JSONParsingError.CannotDecodeKey(key: JSONKeys.DateCreated)
+        guard let dateCreated = properties[JSONKeys.dateCreated.rawValue] as? String else {
+            throw JSONParsingError.cannotDecodeKey(key: JSONKeys.dateCreated)
         }
         
-        let dateClosed = properties[JSONKeys.DateClosed.rawValue] as? String
+        let dateClosed = properties[JSONKeys.dateClosed.rawValue] as? String
         
-        guard let commentsArray = properties[JSONKeys.Comments.rawValue] as? [[String:AnyObject]] else {
-            throw JSONParsingError.CannotDecodeKey(key: JSONKeys.Comments)
+        guard let commentsArray = properties[JSONKeys.comments.rawValue] as? [[String: AnyObject]] else {
+            throw JSONParsingError.cannotDecodeKey(key: JSONKeys.comments)
         }
         
         var comments = [OSMComment]()
         for commentDictionary in commentsArray {
-            let comment = try self.comment(commentDictionary)
+            let comment = try self.comment(dictionary: commentDictionary)
             comments.append(comment)
         }
         
-        let note = OSMNote(osmIdentifier: id, latitude: lat, longitude: lon, open: status, dateCreated: dateCreated, dateClosed:dateClosed, url:url )
+        let note = OSMNote(osmIdentifier: id,
+                           latitude: lat,
+                           longitude: lon,
+                           open: status,
+                           dateCreated: dateCreated,
+                           dateClosed: dateClosed,
+                           url: url )
         
         note.comments = comments
         
         return note
     }
-    
-    public class func notes(data:NSData) throws -> [OSMNote] {
-        guard let jsonDict = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments) as? [String:AnyObject] else {
-            throw JSONParsingError.InvalidJSONStructure
+
+    public class func notes(data: Data) throws -> [OSMNote] {
+        guard let jsonDict = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: AnyObject] else {
+            throw JSONParsingError.invalidJSONStructure
         }
         
-        guard let features = jsonDict[JSONKeys.Features.rawValue] as? [[String:AnyObject]] else {
-            throw JSONParsingError.CannotDecodeKey(key: .Features)
+        guard let features = jsonDict[JSONKeys.features.rawValue] as? [[String: AnyObject]] else {
+            throw JSONParsingError.cannotDecodeKey(key: .features)
         }
         
         var notesArray = [OSMNote]()
         for noteDict in features {
-            let note = try self.note(noteDict)
+            let note = try self.note(dict: noteDict)
             notesArray.append(note)
         }
         
         return notesArray
     }
     
-    public class func note(data:NSData) throws -> OSMNote {
-        guard let noteDict = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments) as? [String:AnyObject] else {
-            throw JSONParsingError.InvalidJSONStructure
+    public class func note(data: Data) throws -> OSMNote {
+        guard let noteDict = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: AnyObject] else {
+            throw JSONParsingError.invalidJSONStructure
         }
         
-        return try self.note(noteDict)
+        return try self.note(dict: noteDict)
     }
 }

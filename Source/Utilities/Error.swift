@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum JSONParsingError : ErrorType {
-    case InvalidJSONStructure
-    case CannotDecodeKey(key:JSONKeys)
+enum JSONParsingError: Error {
+    case invalidJSONStructure
+    case cannotDecodeKey(key: JSONKeys)
 }

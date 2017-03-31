@@ -7,18 +7,15 @@
 //
 
 import XCTest
-@testable import OSMKit_Swift
 
 class OSMParserTest: XCTestCase {
-    
-    
-    var data:NSData?
-    var parser:OSMParser?
+    var data: Data?
+    var parser: OSMParser?
 
     override func setUp() {
         super.setUp()
-        let fileURL = NSBundle(forClass: self.dynamicType).URLForResource("map", withExtension: "osm")
-        self.data = NSData(contentsOfURL: fileURL!)
+        let fileURL = Bundle(for: type(of: self)).url(forResource: "map", withExtension: "osm")
+        self.data = try? Data(contentsOf: fileURL!)
     }
     
     override func tearDown() {
@@ -27,7 +24,6 @@ class OSMParserTest: XCTestCase {
     }
 
     func testParser() {
-        
         var nodeCount = 0
         var wayCount = 0
         var wayNodeCount = 0
@@ -35,13 +31,13 @@ class OSMParserTest: XCTestCase {
         var memberCount = 0
         var tagCount = 0
         
-        let expecation = self.expectationWithDescription("parser")
+        let expecation = self.expectation(description: "parser")
         
-        let startBlock:(parser:OSMParser) -> Void = {parser in
-            
+        let startBlock:(_ parser:OSMParser) -> Void = { parser in
+
         }
         
-        let endBlock:(parser:OSMParser) -> Void = { parser in
+        let endBlock:(_ parser:OSMParser) -> Void = { parser in
             XCTAssertEqual(nodeCount, 12478)
             XCTAssertEqual(wayCount, 1699)
             XCTAssertEqual(relationCount, 120)
@@ -51,7 +47,7 @@ class OSMParserTest: XCTestCase {
             expecation.fulfill()
         }
         
-        let nodeBlock:(parser:OSMParser,element:OSMNode) -> Void = { parser,element in
+        let nodeBlock:(_ parser: OSMParser, _ element: OSMNode) -> Void = { parser, element in
             nodeCount += 1
             XCTAssertGreaterThan(element.osmIdentifier, 0)
             if let tags = element.tags {
@@ -59,15 +55,15 @@ class OSMParserTest: XCTestCase {
             }
         }
         
-        let wayBlock:(parser:OSMParser,way:OSMWay) -> Void = { parser,way in
+        let wayBlock:(_ parser: OSMParser, _ way: OSMWay) -> Void = { parser,way in
             wayCount += 1
-            wayNodeCount += way.nodes.count
+            wayNodeCount += way.nodeIds.count
             if let tags = way.tags {
                 tagCount += tags.count
             }
         }
         
-        let relationBlock:(parser:OSMParser,relation:OSMRelation) -> Void = { parser, relation in
+        let relationBlock:(_ parser: OSMParser,_ relation: OSMRelation) -> Void = { parser, relation in
             relationCount += 1
             memberCount += relation.members.count
             if let tags = relation.tags {
@@ -75,7 +71,7 @@ class OSMParserTest: XCTestCase {
             }
         }
         
-        let errorBlock:(parser:OSMParser,error:ErrorType?) -> Void = { parser, error in
+        let errorBlock:(_ parser: OSMParser, _ error: Error?) -> Void = { parser, error in
             
         }
         
@@ -85,18 +81,17 @@ class OSMParserTest: XCTestCase {
         self.parser?.delegate = parseDelegate
         self.parser?.parse()
         
-        self.waitForExpectationsWithTimeout(100) { (error) -> Void in
-            if let _ = error {
-                print("\(error)")
+        self.waitForExpectations(timeout: 100) { (error) -> Void in
+            if let error = error {
+                print("ERROR \(error)")
             }
         }
     }
 
     func testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measureBlock {
+        self.measure {
             self.testParser()
         }
     }
-
 }
